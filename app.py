@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from tascoscao_logic_generator import process_order
 
@@ -12,9 +13,10 @@ def procesar_pedido():
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "No se recibieron datos"}), 400
-
     resultado = process_order(data)
     return jsonify(resultado)
 
+# Solo para desarrollo local. En Render usaremos gunicorn.
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", "10000"))
+    app.run(host="0.0.0.0", port=port)
