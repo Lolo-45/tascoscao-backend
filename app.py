@@ -1,6 +1,5 @@
-import os
 from flask import Flask, request, jsonify
-from tascoscao_logic_generator import process_order
+from tascoscao_logic.generator import process_order  # <- import correcto
 
 app = Flask(__name__)
 
@@ -10,13 +9,22 @@ def home():
 
 @app.route("/procesar_pedido", methods=["POST"])
 def procesar_pedido():
+    # Asegura que recibimos JSON
+    if not request.is_json:
+        return jsonify({"error": "El cuerpo debe ser JSON"}), 400
+
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "No se recibieron datos"}), 400
-    resultado = process_order(data)
-    return jsonify(resultado)
 
-# Solo para desarrollo local. En Render usaremos gunicorn.
+    try:
+        resultado = process_order(data)
+        return jsonify(resultado), 200
+    except Exception as e:
+        # Evita que el servidor caiga si algo falla dentro de process_order
+        return jsonify({"error": str(e)}), 500
+
+
+# Render usará gunicorn con app:app, pero esto permite ejecutar localmente
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "10000"))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000, debug=False)
