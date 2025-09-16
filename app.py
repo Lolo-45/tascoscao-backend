@@ -1,6 +1,5 @@
-
 from flask import Flask, request, jsonify
-from tascoscao_logic.generator import process_order
+from tascoscao_logic_generator import process_order
 
 app = Flask(__name__)
 
@@ -10,7 +9,7 @@ def home():
 
 @app.route("/procesar_pedido", methods=["POST"])
 def procesar_pedido():
-    data = request.json
+    data = request.get_json(silent=True)
     if not data:
         return jsonify({"error": "No se recibieron datos"}), 400
 
